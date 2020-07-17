@@ -1,0 +1,116 @@
+<!-- extends表明此页面继承自 base.html 文件 -->
+{% extends "base.html" %}
+
+<!-- 隐藏分隔条 -->
+<div class="ui hidden divider"></div>
+
+<!-- 写入 base.html 中定义的 body content -->
+{% block body %}
+<!-- 因为semantic ui的特性需要在body部分写个pusher避免内容被顶部导航栏遮挡 -->
+<div id="pusher" class="pusher" style="padding-top:50px">
+<div class="ui container">
+    <div class="ui pointing secondary menu">
+        <a class="item active" data-tab="first"><i class="circle icon"></i>吃香技能</a>
+        <a class="item" data-tab="second"><i class="star icon"></i>公司福利</a>
+        <a class="item" data-tab="third"><i class="heart icon"></i>热门方向</a>
+        <a class="item" data-tab="fourth"><i class="yen sign icon"></i>高资城市</a>
+        <a class="item" data-tab="fifth"><i class="trophy icon"></i>流行岗位</a>
+        <a class="item" data-tab="sixth"><i class="users icon"></i>工作经验与需求</a>
+    </div>
+    <div class="ui tab segment active" data-tab="first">
+        <h3 class="ui header">
+            <div class="content">
+            柱状图
+            <div class="sub header">平均薪资前十的技能</div>
+            </div>
+        </h3>
+        <div class="ui divider"></div>
+        <div class="ui container middle">
+            <div id="frame1" style="width: 1000px;height: 600px;">
+{#                放图表的地方#}
+                <div style="margin-left:20%">{% include 'charts/salary.html' %}</div>
+            </div>
+        </div>
+    </div>
+    <div class="ui tab segment" data-tab="second">
+        <h3 class="ui header">
+            <div class="content">
+            公司福利词云
+            <div class="sub header">心动不如行动</div>
+            </div>
+        </h3>
+        <div class="ui divider"></div>
+        <div class="ui container">
+            <div id="frame1" style="width: 1000px;height: 600px;">
+{#                放图表的地方#}
+                <div style="margin-left: -10%">{% include 'charts/welfare.html' %}</div>
+            </div>
+        </div>
+    </div>
+    <div class="ui tab segment" data-tab="third">
+        <h3 class="ui header">
+            <div class="content">
+            玫瑰图
+            <div class="sub header">热门方向</div>
+            </div>
+        </h3>
+        <div class="ui divider"></div>
+        <div class="ui container">
+            <div id="frame1" style="width: 1000px;height: 600px;">
+{#                放图表的地方#}
+                <div style="">{% include 'charts/top_major.html' %}</div>
+            </div>
+        </div>
+    </div>
+    <div class="ui tab segment" data-tab="fourth">
+        <h3 class="ui header">
+            <div class="content">
+            饼状图
+            <div class="sub header">热门薪资城市TOP10</div>
+            </div>
+        </h3>
+        <div class="ui divider"></div>
+        <div class="ui container">
+            <div id="frame1" style="width: 1000px;height: 600px;">
+{#                放图表的地方#}
+                <div style="margin-left: 10%">{% include 'charts/place.html' %}</div>
+            </div>
+        </div>
+    </div>
+    <div class="ui tab segment" data-tab="fifth">
+        <h3 class="ui header">
+            <div class="content">
+            漏斗图
+            <div class="sub header">热门岗位</div>
+            </div>
+        </h3>
+        <div class="ui divider"></div>
+        <div class="ui container">
+            <div id="frame1" style="width: 1000px;height: 600px;">
+{#                放图表的地方#}
+                <div style="margin-left: 10%">{% include 'charts/career_funnel.html' %}</div>
+            </div>
+        </div>
+    </div>
+    <div class="ui tab segment" data-tab="sixth">
+        <h3 class="ui header">
+            <div class="content">
+            散点图
+            <div class="sub header">一般公司要求的工作经验年限与公司需求数之间的关系</div>
+            </div>
+        </h3>
+        <div class="ui divider"></div>
+        <div class="ui container">
+            <div id="frame1" style="width: 1000px;height: 600px;">
+{#                放图表的地方#}
+                <div style="margin-left:10%">{% include 'charts/number.html' %}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+<script>
+    $('.menu .item').tab();
+</script>
+{% endblock body %}

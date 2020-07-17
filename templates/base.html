@@ -1,0 +1,37 @@
+<!-- 载入静态文件 更早版本可能会用load staticfiles -->
+{% load static %}
+
+<!DOCTYPE html>
+<!-- 网站主语言 -->
+<html lang="zh-cn">
+
+<head>
+    <!-- 网站采用的字符编码 -->
+    <meta charset="utf-8">
+    <title>数据分析</title>
+    <link rel="stylesheet" href="{% static 'DataTables-1.10.21/css/dataTables.semanticui.min.css' %}">
+    <link rel="stylesheet" href="{% static 'SemanticUI-2.2.13/semantic.min.css' %}">
+    <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/components/icon.min.css'>
+    <script src="{% static 'DataTables-1.10.21/js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'jQuery-3.3.1/jquery-3.3.1.js' %}"></script>
+    <script src="{% static 'DataTables-1.10.21/js/dataTables.semanticui.min.js' %}"></script>
+    <script src="{% static 'datatables.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'SemanticUI-2.2.13/semantic.js' %}"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.8.0/echarts.min.js"></script>
+    <script src="{% static 'echarts/china.js' %}"></script>
+</head>
+
+
+
+<body>
+
+<!-- 引入导航栏 -->
+{% include 'header.html' %}
+<!-- 预留具体页面的位置 -->
+{% block body %}{% endblock body %}
+<!-- 引入注脚 -->
+{% include 'footer.html' %}
+
+</body>
+
+</html>

@@ -1,0 +1,310 @@
+<div class="ui container">
+    <div class="ui form">
+        <form action="" method="post">
+            {% csrf_token %}
+            <h3 class="ui header" id="analysis">筛选维度</h3>
+            <div class="field">
+                <div class="fields">
+                    <div class="sixteen wide field">
+                        <select name="DIMENSION_select" id="DIMENSION_select" class="ui fluid search dropdown">
+                            <option value="" selected>城市|CITY</option>
+                            {% for value in ci_li %}
+                                <option value="{{ value }}">{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="fields">
+                    <div class="sixteen wide field">
+                        <select name="EDUCATION_select" id="EDUCATION_select" class="ui fluid search dropdown">
+                            <option value="" selected>教育程度|EDUCATION</option>
+                            <option value="博士">博士</option>
+                            <option value="硕士">硕士</option>
+                            <option value="本科">本科</option>
+                            <option value="大专">大专</option>
+                            <option value="不限">不限</option>
+                        </select>
+                    </div>
+                </div><div class="fields">
+                    <div class="sixteen wide field">
+                        <select name="EXPERIENCE_select" id="EXPERIENCE_select" class="ui fluid search dropdown">
+                            <option value="" selected>工作经历|EXPERIENCE</option>
+                            <option value="无">无</option>
+                            <option value="在校生/应届生">在校生/应届生</option>
+                            <option value="1">1年</option>
+                            <option value="2">2年</option>
+                            <option value="3">3年以上</option>
+{#                            #}
+{#                            等待处理！！！5年以上模糊匹配的字段#}
+{#                            #}
+{#                            #}
+
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <h3 class="ui header" id="keyword">关键词</h3>
+            <div class="field">
+            {% for key,value in mselect_dict.items %}
+                <div class="field">
+                    <select name="{{ value.select|add:"_select[]" }}" id="{{ value.select|add:"_select" }}" multiple="" class="ui fluid search dropdown">
+                        <option value="">{{ key }}</option>
+                        {% for item in value.options %}
+                            <option value="{{ item }}">{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endfor %}
+            </div>
+            <h3 class="ui header" id="skill">技能列表</h3>
+            <div class="field">
+            {% for key,value in sel_features_dict.items %}
+                <div class="field">
+                    <select name="skills" id="skill_options" multiple="" class="ui fluid search dropdown">
+                        <option value="">{{ key }}</option>
+                        {% for item in value.options %}
+                        <option value="{{ item }}">{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endfor %}
+            </div>
+            <br>
+            <div class="ui buttons">
+                <input class="ui blue button" type="button" id="AJAX_get" value="查询"/>
+            </div>
+            <div class="field">
+                <p id="test111"></p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    $('.ui.fluid.search.dropdown')
+        .dropdown({fullTextSearch:true});
+</script>
+<script>
+    // 在JS中再次使用字段字典，要加|safe不转义
+    var dict = {{ mselect_dict|safe }};
+    // 还是转义问题，在Django模板中遇到带有{}的html代码必须使用replace这种方式处理
+    var url = "{% url 'test:search' 'COLUMNPLACEHOLDER' 'QUERYPLACEHOLDER' %}".replace(
+        'QUERYPLACEHOLDER', '{query}'
+    );
+    // jQuery语法遍历所有多选框
+    $('.ui.fluid.search.dropdown.selection.multiple').each(function () {
+        // Semantic UI语法获得多选框默认文本
+        var text = $(this).dropdown('get default text');
+        // 根据字典倒推该多选框是哪个字段
+        var column = dict[text]['select'];
+        $(this).dropdown(
+            {
+                apiSettings: {
+                    // 用下方URL从后端返回查询后的json
+                    url: url.replace('COLUMNPLACEHOLDER', column)
+                },
+                // 输入至少1个字符后才query
+                minCharacters : 1
+            })
+        ;
+    })
+</script>
+<script type="text/javascript">
+    $("#AJAX_get").click(function () {
+        // 获取单选下拉框的值
+
+        var form_data = {
+            "DIMENSION_select": $("#DIMENSION_select").val(),
+            "EDUCATION_select": $("#EDUCATION_select").val(),
+            "EXPERIENCE_select": $("#EXPERIENCE_select").val(),
+
+        };
+
+        // 获取多选下拉框的值
+        var dict = {{ mselect_dict|safe }};
+        for (key in dict) {
+            var form_name = dict[key]['select'] + "_select";
+            jquery_selector_id = "[id='" + form_name + "']";//因为我们的部分多选框id有空格，要用这种写法
+            form_data[form_name] = $(jquery_selector_id).val();
+        }
+
+
+        //获取技能列表值
+        form_data["list_select"]=$("#skill_options").val();
+
+        {#for (key in list) {#}
+        {#    for (item in key) {#}
+        {#        var form_list = list[key][item]+ "_options";#}
+        {#        jquery_selector_id = "[id='" + form_list + "']";#}
+        {#        form_data[form_list] = $(jquery_selector_id).val();#}
+        {#    }#}
+        {# }#}
+
+        $.ajax({
+            // 请求的url
+            url: '{% url 'test:query' %}',
+            // 请求的type
+            type: 'GET',
+            // 发送的数据
+            data: form_data,
+            // 回调函数，其中ret是返回的JSON，可以以字典的方式调用
+            success: function (ret) {     //成功执行
+                 {#$("#label_size_unit").html("最新"+form_data['EDUCATION_select']+ " " +form_data['EXPERIENCE_select']);#}
+                 // 把查询结果输出到网页上预留id的DOM元素中
+
+                 $("#result_table").html(ret['ptable']);
+                 initTable($("#ptable"))
+
+               var option = {
+                grid: {
+                    left: '20%',
+                    right: '20%',
+                },
+                radar: {
+                    // shape: 'circle',
+                    nameGap: 5,
+                    center: ['50%', '50%'],
+                    radius: '50%',
+                    name: {
+                        formatter: function (value, indicator) {
+                            let text = value + '\n' + '$' + indicator.num
+                            return text
+
+                        },
+                        textStyle: {
+                            color: '#fff',
+                            backgroundColor: '#5f5f5f',
+                            borderRadius: 3,
+                            padding: [3, 5],
+                            fontSize: '10',
+
+                        }
+                    },
+                    indicator: (function () {
+                        var names = {{Suggest_Skills_Skills | safe}};
+                        var res = []
+                        var myArray = {{ Suggest_Skills_SkillsSalary|safe}};
+                        names.forEach((a, i) => res.push({
+                            text: a,
+                            num: myArray[i],
+                            max: {{max_Suggest_Skills_SkillsSalary | safe}}
+                        }));
+                        return res
+                    })(),
+                },
+
+                series: [{
+                    name: 'Average Salary',
+                    type: 'radar',
+                    areaStyle: {normal: {type: 'default'}},
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'inside',
+                            formatter: '+${c0}',
+
+                        }
+                    },
+                    data: [
+                        {
+                            value: {{ Suggest_Skills_SkillsSalary|safe}},
+                            name: 'Avg Salary',
+                            label: {
+                                normal: {
+                                    color: '#C23531',
+                                    position: 'outside',
+                                    fontSize: 14,
+                                    backgroundColor: 'white'
+
+                                }
+                            }
+                        }
+
+                    ]
+                }]
+            };
+                myChart.setOption(option);
+
+
+                },
+
+
+            error: function () {            //失败
+                console.log('失败')
+            }
+        });
+
+    })
+</script>
+<script>
+    function initTable(table) {
+        table.DataTable(
+            {
+                'pageLength': 5, // 前端分页，初始每页显示5条记录
+                'autoWidth': false, // 不自动调整表格宽度
+                'lengthMenu': [5,10,25,50,100],
+                'oLanguage': { // UI Label本地化
+                    "sLengthMenu": "显示 _MENU_ 项结果",
+                    "sProcessing": "处理中...",
+                    "sZeroRecords": "没有匹配结果",
+                    "sInfo": "显示第 _START_ 至 _END_ 条结果，共 _TOTAL_ 条",
+                    "sInfoEmpty": "没有数据",
+                    "sInfoFiltered": "(获取 _MAX_ 条客户档案)",
+                    "sInfoPostFix": "",
+                    "sSearch": "搜索:",
+                    "sUrl": "",
+                    "sEmptyTable": "表中数据为空",
+                    "sLoadingRecords": "载入中...",
+                    "sInfoThousands": ",",
+                    "oPaginate": {
+                        "sFirst": "首页",
+                        "sPrevious": "上页",
+                        "sNext": "下页",
+                        "sLast": "末页"
+                    },
+                },
+                {#这里有问题！！！！！！！！！#}
+                {#'fnCreatedRow': function( row, data, dataIndex ) {#}
+                {#    if(data.comment.length > 20){//只有超长，才有td点击事件#}
+                {#        $(row).children('td').eq(10).attr('onclick','javascript:changeShowRemarks(this);');#}
+                {#    }#}
+                {#    $(row).children('td').eq(10).attr('content',data.comment);#}
+                {# },#}
+                {#'aoColumnDefs' : [#}
+                {#    {#}
+                {#        "aTargets" :　["_all"],#}
+                {#        "mRender" : function(data, type, full){#}
+                {#            if (full.comment.length > 20) {#}
+                {#                return getPartialRemarksHtml(full.comment);//显示部分信息#}
+                {#            } else {#}
+                {#                return full.comment;//显示原始全部信息}#}
+                {#            }#}
+                {#        }#}
+                {#    }#}
+                {#    ]#}
+
+            }
+        );
+    }
+    //切换显示备注信息，显示部分或者全部
+    function changeShowRemarks(obj){//obj是td
+        var content = $(obj).attr("content");
+        if(content != null && content != ''){
+            if($(obj).attr("isDetail") == 'true'){//当前显示的是详细备注，切换到显示部分
+                $(obj).attr('isDetail',false);
+                $(obj).html(getPartialRemarksHtml(content));
+            }else{//当前显示的是部分备注信息，切换到显示全部
+                $(obj).attr('isDetail',true);
+                $(obj).html(getTotalRemarksHtml(content));
+            }
+        }
+    }
+//部分备注信息
+    function getPartialRemarksHtml(remarks){
+        return remarks.substr(0,20) + '&nbsp;&nbsp;<a href="javascript:void(0);" ><b>更多</b></a>';
+    }
+//全部备注信息
+    function getTotalRemarksHtml(remarks){
+        return remarks + '&nbsp;&nbsp;<a href="javascript:void(0);" >收起</a>';
+    }
+</script>
